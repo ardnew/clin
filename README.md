@@ -2,7 +2,7 @@
 [docurl]:https://godoc.org/github.com/ardnew/clin
 
 # clin
-##### Go module to get user input from command-line Go applications.
+##### Get user input from command-line Go applications.
 
 [![GoDoc][docimg]][docurl]
 
