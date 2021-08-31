@@ -68,8 +68,7 @@ func Reader(args []string) io.Reader { return input.Reader(args) }
 func (in *Input) Args(args []string) []string {
 	if len(args) == 0 {
 		// No arguments: read lines from stdin.
-		//s := bufio.NewScanner(os.Stdin)
-		s := bufio.NewScanner(strings.NewReader("hello\r\n\nhi\n\n"))
+		s := bufio.NewScanner(os.Stdin)
 		a := []string{}
 		s.Split(in.scanArgs)
 		in.skipToken = false
