@@ -62,7 +62,8 @@ func Default() Input { return input }
 // both CR+LF ("\r\n") and LF ("\n").
 func Args(args []string) []string { return input.Args(args) }
 
-// Fields is like Args, but with all empty (zeroed) string elements removed.
+// Fields wraps Args, and removes all empty (zeroed) string elements in the
+// returned slice.
 func Fields(args []string) []string { return input.Fields(args) }
 
 // Reader returns an io.Reader over the string constructed by joining all
@@ -93,8 +94,10 @@ func (in *Input) Args(args []string) []string {
 	return args
 }
 
-// Fields is like Args, but with all empty (zeroed) string elements removed.
+// Fields wraps Args, and removes all empty (zeroed) string elements in the
+// returned slice.
 func (in *Input) Fields(args []string) []string {
+	args = in.Args(args)
 	a := make([]string, 0, len(args))
 	for _, s := range args {
 		if s != "" {
