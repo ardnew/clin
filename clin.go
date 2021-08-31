@@ -16,7 +16,6 @@ package clin
 
 import (
 	"bufio"
-	"bytes"
 	"io"
 	"os"
 	"strings"
@@ -37,6 +36,8 @@ type Input struct {
 	// When Reader returns a strings.NewReader over the given slice args,
 	// the elements of args are joined together, with ReadDelim as separator.
 	ReadDelim []byte
+	// Discard final Scanner token, if empty, when reading os.Stdin in Args.
+	skipToken bool
 }
 
 var input = Input{
@@ -67,11 +68,15 @@ func Reader(args []string) io.Reader { return input.Reader(args) }
 func (in *Input) Args(args []string) []string {
 	if len(args) == 0 {
 		// No arguments: read lines from stdin.
-		s := bufio.NewScanner(os.Stdin)
+		//s := bufio.NewScanner(os.Stdin)
+		s := bufio.NewScanner(strings.NewReader("hello\r\n\nhi\n\n"))
 		a := []string{}
 		s.Split(in.scanArgs)
+		in.skipToken = false
 		for s.Scan() {
-			a = append(a, s.Text())
+			if !in.skipToken {
+				a = append(a, s.Text())
+			}
 		}
 		return a
 	}
@@ -114,7 +119,7 @@ func (in *Input) scanArgs(data []byte, atEOF bool) (int, []byte, error) {
 		return bufio.ScanRunes(data, atEOF)
 	}
 	for i := 0; i <= len(data)-n; i++ {
-		if bytes.Equal(in.ArgsDelim, data[i:i+n]) {
+		if string(in.ArgsDelim) == string(data[i:i+n]) {
 			// If ArgsDelim is a simple newline, also remove any trailing "\r"
 			// that exists, which transparently handles Windows/DOS input.
 			// Besides this one possible byte, all other trailing whitespace is
@@ -129,5 +134,9 @@ func (in *Input) scanArgs(data []byte, atEOF bool) (int, []byte, error) {
 	if !atEOF {
 		return 0, nil, nil
 	}
+	// If the input is terminated with a delimiter, we reach here with a zero-
+	// length slice data. Discard this empty, final token.
+	// All other empty tokens (consecutive delimiters) are preserved.
+	in.skipToken = len(data) == 0
 	return 0, data, bufio.ErrFinalToken
 }
